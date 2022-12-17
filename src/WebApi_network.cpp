@@ -3,12 +3,11 @@
  * Copyright (C) 2022 Thomas Basler and others
  */
 #include "WebApi_network.h"
-#include "ArduinoJson.h"
-#include "AsyncJson.h"
 #include "Configuration.h"
 #include "NetworkSettings.h"
 #include "WebApi.h"
 #include "helper.h"
+#include <AsyncJson.h>
 
 void WebApiNetworkClass::init(AsyncWebServer* server)
 {
@@ -27,6 +26,10 @@ void WebApiNetworkClass::loop()
 
 void WebApiNetworkClass::onNetworkStatus(AsyncWebServerRequest* request)
 {
+    if (!WebApi.checkCredentialsReadonly(request)) {
+        return;
+    }
+
     AsyncJsonResponse* response = new AsyncJsonResponse();
     JsonObject root = response->getRoot();
 

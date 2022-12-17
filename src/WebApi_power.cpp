@@ -3,10 +3,9 @@
  * Copyright (C) 2022 Thomas Basler and others
  */
 #include "WebApi_power.h"
-#include "ArduinoJson.h"
-#include "AsyncJson.h"
-#include "Hoymiles.h"
 #include "WebApi.h"
+#include <AsyncJson.h>
+#include <Hoymiles.h>
 
 void WebApiPowerClass::init(AsyncWebServer* server)
 {
@@ -24,6 +23,10 @@ void WebApiPowerClass::loop()
 
 void WebApiPowerClass::onPowerStatus(AsyncWebServerRequest* request)
 {
+    if (!WebApi.checkCredentialsReadonly(request)) {
+        return;
+    }
+
     AsyncJsonResponse* response = new AsyncJsonResponse();
     JsonObject root = response->getRoot();
 

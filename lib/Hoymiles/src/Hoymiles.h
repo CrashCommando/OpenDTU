@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
 #pragma once
 
 #include "HoymilesRadio.h"
@@ -12,7 +13,7 @@
 
 class HoymilesClass {
 public:
-    void init();
+    void init(SPIClass* initialisedSpiBus, uint8_t pinCE, uint8_t pinIRQ);
     void loop();
 
     std::shared_ptr<InverterAbstract> addInverter(const char* name, uint64_t serial);
@@ -30,6 +31,8 @@ public:
 private:
     std::vector<std::shared_ptr<InverterAbstract>> _inverters;
     std::unique_ptr<HoymilesRadio> _radio;
+
+    SemaphoreHandle_t _xSemaphore;
 
     uint32_t _pollInterval = 0;
     uint32_t _lastPoll = 0;

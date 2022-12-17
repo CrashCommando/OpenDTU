@@ -3,10 +3,9 @@
  * Copyright (C) 2022 Thomas Basler and others
  */
 #include "WebApi_config.h"
-#include "ArduinoJson.h"
-#include "AsyncJson.h"
 #include "Configuration.h"
 #include "WebApi.h"
+#include <AsyncJson.h>
 #include <LittleFS.h>
 
 void WebApiConfigClass::init(AsyncWebServer* server)
@@ -37,7 +36,7 @@ void WebApiConfigClass::onConfigGet(AsyncWebServerRequest* request)
         return;
     }
 
-    request->send(LittleFS, CONFIG_FILENAME_JSON, String(), true);
+    request->send(LittleFS, CONFIG_FILENAME, String(), true);
 }
 
 void WebApiConfigClass::onConfigDelete(AsyncWebServerRequest* request)
@@ -96,7 +95,7 @@ void WebApiConfigClass::onConfigDelete(AsyncWebServerRequest* request)
     response->setLength();
     request->send(response);
 
-    LittleFS.remove(CONFIG_FILENAME_JSON);
+    LittleFS.remove(CONFIG_FILENAME);
     ESP.restart();
 }
 
@@ -127,7 +126,7 @@ void WebApiConfigClass::onConfigUpload(AsyncWebServerRequest* request, String fi
 
     if (!index) {
         // open the file on first call and store the file handle in the request object
-        request->_tempFile = LittleFS.open(CONFIG_FILENAME_JSON, "w");
+        request->_tempFile = LittleFS.open(CONFIG_FILENAME, "w");
     }
 
     if (len) {

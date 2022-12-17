@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+/*
+ * Copyright (C) 2022 Thomas Basler and others
+ */
 #include "DevInfoParser.h"
 #include <cstring>
 
@@ -15,8 +19,10 @@ const devInfo_t devInfo[] = {
     { { 0x10, 0x10, 0x40, ALL }, 400, "HM-400" },
     { { 0x10, 0x11, 0x10, ALL }, 600, "HM-600" },
     { { 0x10, 0x11, 0x20, ALL }, 700, "HM-700" },
+    { { 0x10, 0x11, 0x30, ALL }, 800, "HM-800" },
     { { 0x10, 0x11, 0x40, ALL }, 800, "HM-800" },
     { { 0x10, 0x12, 0x10, ALL }, 1200, "HM-1200" },
+    { { 0x10, 0x02, 0x30, ALL }, 1500, "MI-1500 Gen3" },
     { { 0x10, 0x12, 0x30, ALL }, 1500, "HM-1500" },
     { { 0x10, 0x10, 0x10, 0x15 }, static_cast<uint16_t>(300 * 0.7), "HM-300" }, // HM-300 factory limitted to 70%
 };

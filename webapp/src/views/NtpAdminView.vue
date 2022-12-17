@@ -63,7 +63,8 @@
                 <div class="alert alert-secondary" role="alert">
                     <b>Hint:</b> You can use the manual time synchronization to set the current time of OpenDTU if
                     no NTP server is available. But be aware, that in case of power cycle the time gets lost. Also
-                    the time accurancy can be very bad as it is not resynchronised regularly.
+                    note that time accuracy will be skewed badly, as it can not be resynchronised regularly and the
+                    ESP32 microcontroller does not have a real time clock.
                 </div>
 
             </div>
@@ -129,7 +130,7 @@ export default defineComponent({
         getNtpConfig() {
             this.dataLoading = true;
             fetch("/api/ntp/config", { headers: authHeader() })
-                .then((response) => handleResponse(response, this.$emitter))
+                .then((response) => handleResponse(response, this.$emitter, this.$router))
                 .then(
                     (data) => {
                         this.ntpConfigList = data;
@@ -144,7 +145,7 @@ export default defineComponent({
         getCurrentTime() {
             this.dataLoading = true;
             fetch("/api/ntp/time", { headers: authHeader() })
-                .then((response) => handleResponse(response, this.$emitter))
+                .then((response) => handleResponse(response, this.$emitter, this.$router))
                 .then(
                     (data) => {
                         this.mcuTime = new Date(
@@ -172,7 +173,7 @@ export default defineComponent({
                 headers: authHeader(),
                 body: formData,
             })
-                .then((response) => handleResponse(response, this.$emitter))
+                .then((response) => handleResponse(response, this.$emitter, this.$router))
                 .then(
                     (response) => {
                         this.alertMessage = response.message;
@@ -195,7 +196,7 @@ export default defineComponent({
                 headers: authHeader(),
                 body: formData,
             })
-                .then((response) => handleResponse(response, this.$emitter))
+                .then((response) => handleResponse(response, this.$emitter, this.$router))
                 .then(
                     (response) => {
                         this.alertMessage = response.message;

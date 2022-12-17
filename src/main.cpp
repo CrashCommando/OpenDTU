@@ -3,9 +3,9 @@
  * Copyright (C) 2022 Thomas Basler and others
  */
 #include "Configuration.h"
-#include "Hoymiles.h"
-#include "MqttHassPublishing.h"
-#include "MqttPublishing.h"
+#include "MqttHandleDtu.h"
+#include "MqttHandleHass.h"
+#include "MqttHandleInverter.h"
 #include "MqttSettings.h"
 #include "NetworkSettings.h"
 #include "NtpSettings.h"
@@ -13,6 +13,7 @@
 #include "WebApi.h"
 #include "defaults.h"
 #include <Arduino.h>
+#include <Hoymiles.h>
 #include <LittleFS.h>
 
 void setup()
@@ -68,8 +69,9 @@ void setup()
     // Initialize MqTT
     Serial.print(F("Initialize MqTT... "));
     MqttSettings.init();
-    MqttPublishing.init();
-    MqttHassPublishing.init();
+    MqttHandleDtu.init();
+    MqttHandleInverter.init();
+    MqttHandleHass.init();
     Serial.println(F("done"));
 
     // Initialize WebApi
@@ -93,7 +95,9 @@ void setup()
 
     // Initialize inverter communication
     Serial.print(F("Initialize Hoymiles interface... "));
-    Hoymiles.init();
+    SPIClass* spiClass = new SPIClass(HSPI);
+    spiClass->begin(HOYMILES_PIN_SCLK, HOYMILES_PIN_MISO, HOYMILES_PIN_MOSI, HOYMILES_PIN_CS);
+    Hoymiles.init(spiClass, HOYMILES_PIN_CE, HOYMILES_PIN_IRQ);
 
     Serial.println(F("  Setting radio PA level... "));
     Hoymiles.getRadio()->setPALevel((rf24_pa_dbm_e)config.Dtu_PaLevel);
@@ -116,7 +120,7 @@ void setup()
 
             if (inv != nullptr) {
                 for (uint8_t c = 0; c < INV_MAX_CHAN_COUNT; c++) {
-                    inv->Statistics()->setChannelMaxPower(c, config.Inverter[i].MaxChannelPower[c]);
+                    inv->Statistics()->setChannelMaxPower(c, config.Inverter[i].channel[c].MaxChannelPower);
                 }
             }
             Serial.println(F(" done"));
@@ -131,9 +135,11 @@ void loop()
     yield();
     Hoymiles.loop();
     yield();
-    MqttPublishing.loop();
+    MqttHandleDtu.loop();
     yield();
-    MqttHassPublishing.loop();
+    MqttHandleInverter.loop();
+    yield();
+    MqttHandleHass.loop();
     yield();
     WebApi.loop();
     yield();

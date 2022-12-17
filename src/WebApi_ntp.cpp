@@ -3,12 +3,11 @@
  * Copyright (C) 2022 Thomas Basler and others
  */
 #include "WebApi_ntp.h"
-#include "ArduinoJson.h"
-#include "AsyncJson.h"
 #include "Configuration.h"
 #include "NtpSettings.h"
 #include "WebApi.h"
 #include "helper.h"
+#include <AsyncJson.h>
 
 void WebApiNtpClass::init(AsyncWebServer* server)
 {
@@ -29,6 +28,10 @@ void WebApiNtpClass::loop()
 
 void WebApiNtpClass::onNtpStatus(AsyncWebServerRequest* request)
 {
+    if (!WebApi.checkCredentialsReadonly(request)) {
+        return;
+    }
+
     AsyncJsonResponse* response = new AsyncJsonResponse();
     JsonObject root = response->getRoot();
     const CONFIG_T& config = Configuration.get();
@@ -38,7 +41,7 @@ void WebApiNtpClass::onNtpStatus(AsyncWebServerRequest* request)
     root[F("ntp_timezone_descr")] = config.Ntp_TimezoneDescr;
 
     struct tm timeinfo;
-    if (!getLocalTime(&timeinfo, 0)) {
+    if (!getLocalTime(&timeinfo, 5)) {
         root[F("ntp_status")] = false;
     } else {
         root[F("ntp_status")] = true;
@@ -159,7 +162,7 @@ void WebApiNtpClass::onNtpTimeGet(AsyncWebServerRequest* request)
     JsonObject root = response->getRoot();
 
     struct tm timeinfo;
-    if (!getLocalTime(&timeinfo, 0)) {
+    if (!getLocalTime(&timeinfo, 5)) {
         root[F("ntp_status")] = false;
     } else {
         root[F("ntp_status")] = true;
@@ -273,6 +276,7 @@ void WebApiNtpClass::onNtpTimePost(AsyncWebServerRequest* request)
     local.tm_mday = root[F("day")].as<uint>(); // day of the month - [ 1 to 31 ]
     local.tm_mon = root[F("month")].as<uint>() - 1; // months since January - [ 0 to 11 ]
     local.tm_year = root[F("year")].as<uint>() - 1900; // years since 1900
+    local.tm_isdst = -1;
 
     time_t t = mktime(&local);
     struct timeval now = { .tv_sec = t, .tv_usec = 0 };
